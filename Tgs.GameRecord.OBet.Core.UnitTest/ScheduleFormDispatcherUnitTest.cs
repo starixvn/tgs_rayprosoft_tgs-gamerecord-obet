@@ -21,7 +21,7 @@ public class ScheduleFormDispatcherUnitTest
         var fakeScheduleFormLock = Substitute.For<IScheduleFormLock>();
         var fakePullRecord = Substitute.For<ICommandService<PullRecordCommand>>();
 
-        var gameProviderCode = "FACHAI";
+        var gameProviderCode = "OBET";
         var id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
         var parameter = new OBetParameter
@@ -38,7 +38,7 @@ public class ScheduleFormDispatcherUnitTest
             GameProviderId = Guid.NewGuid(),
             GameProviderCode = gameProviderCode,
             Name = "test",
-            Subject = "gp.gamerecord.scheduleform.fachai.queued",
+            Subject = "gp.gamerecord.scheduleform.OBET.queued",
             Source = ScheduleFormSource.Schedule,
             Parameters = JsonSerializer.Serialize(parameter),
             State = ScheduleFormState.Queued,
@@ -122,7 +122,7 @@ public class ScheduleFormDispatcherUnitTest
         var fakeScheduleFormLock = Substitute.For<IScheduleFormLock>();
         var fakePullRecord = Substitute.For<ICommandService<PullRecordCommand>>();
 
-        var gameProviderCode = "FACHAI";
+        var gameProviderCode = "OBET";
         var id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
         var parameter = new OBetParameter
@@ -139,7 +139,7 @@ public class ScheduleFormDispatcherUnitTest
             GameProviderId = Guid.NewGuid(),
             GameProviderCode = gameProviderCode,
             Name = "test",
-            Subject = "gp.gamerecord.scheduleform.fachai.queued",
+            Subject = "gp.gamerecord.scheduleform.OBET.queued",
             Source = ScheduleFormSource.Manual,
             Parameters = JsonSerializer.Serialize(parameter),
             State = ScheduleFormState.Queued,
@@ -215,7 +215,7 @@ public class ScheduleFormDispatcherUnitTest
         var fakeScheduleFormLock = Substitute.For<IScheduleFormLock>();
         var fakePullRecord = Substitute.For<ICommandService<PullRecordCommand>>();
 
-        var gameProviderCode = "FACHAI";
+        var gameProviderCode = "OBET";
         var id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
         var parameter = new OBetParameter
@@ -232,7 +232,7 @@ public class ScheduleFormDispatcherUnitTest
             GameProviderId = Guid.NewGuid(),
             GameProviderCode = gameProviderCode,
             Name = "test",
-            Subject = "gp.gamerecord.scheduleform.fachai.queued",
+            Subject = "gp.gamerecord.scheduleform.OBET.queued",
             Source = ScheduleFormSource.Schedule,
             Parameters = JsonSerializer.Serialize(parameter),
             State = ScheduleFormState.Queued,
@@ -308,7 +308,7 @@ public class ScheduleFormDispatcherUnitTest
         var fakeScheduleFormLock = Substitute.For<IScheduleFormLock>();
         var fakePullRecord = Substitute.For<ICommandService<PullRecordCommand>>();
 
-        var gameProviderCode = "FACHAI";
+        var gameProviderCode = "OBET";
         var id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
         var parameter = new OBetParameter
@@ -325,7 +325,7 @@ public class ScheduleFormDispatcherUnitTest
             GameProviderId = Guid.NewGuid(),
             GameProviderCode = gameProviderCode,
             Name = "test",
-            Subject = "gp.gamerecord.scheduleform.fachai.queued",
+            Subject = "gp.gamerecord.scheduleform.OBET.queued",
             Source = ScheduleFormSource.Schedule,
             Parameters = JsonSerializer.Serialize(parameter),
             State = ScheduleFormState.Processing,
