@@ -43,5 +43,4 @@ public class OBetController : ControllerBase
                 source.EndDate,
                 ScheduleFormSource.Manual),
             cancellationToken: HttpContext.RequestAborted);
-
 }

@@ -1,24 +1,24 @@
 ﻿using System.Text.Json;
-using Tgs.GameRounds.Work.Manual.Client;
-using Tgs.GameRounds.Work.Manual.Common.Protos;
+using Tgs.GameRounds.Work.Client;
+using Tgs.GameRounds.Work.Common.Protos;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.OBet.Core.ApplicationServices;
 
-internal class ManualHandleRecordCommandService : ICommandService<ManualHandleRecordCommand>
+internal class HandleRecordCommandService : ICommandService<HandleRecordCommand>
 {
-    private readonly IGameRoundsWorkManualClient _client;
+    private readonly IGameRoundsWorkClient _client;
     private readonly IUtensil _utensil;
 
-    public ManualHandleRecordCommandService(
+    public HandleRecordCommandService(
         IUtensil utensil,
-        IGameRoundsWorkManualClient client)
+        IGameRoundsWorkClient client)
     {
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public async ValueTask ExecuteAsync(ManualHandleRecordCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask ExecuteAsync(HandleRecordCommand command, CancellationToken cancellationToken = default)
     {
         var gameProviderId = await _utensil
             .GetGameProviderIdAsync(
@@ -33,20 +33,20 @@ internal class ManualHandleRecordCommandService : ICommandService<ManualHandleRe
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        var playerModel = await _utensil
+        var player = await _utensil
             .GetPlayerAsync(
                 playerCode: command.GameRecord.PlayerCode,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        bool success = (playerModel != null);
+        bool success = (player != null);
 
         Guid? gameProviderConfigurationId = default;
-        if (playerModel != null)
+        if (player != null)
         {
             gameProviderConfigurationId = await _utensil
                 .GetBrandGameProviderConfigurationIdAsync(
-                    brandId: playerModel.BrandId,
+                    brandId: player.BrandId,
                     gameProviderId: gameProviderId,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
             if (!gameProviderConfigurationId.HasValue)
@@ -80,10 +80,10 @@ internal class ManualHandleRecordCommandService : ICommandService<ManualHandleRe
                 externalRoundId: command.GameRecord.ExternalRoundId,
                 gameId: gameId,
                 externalGameId: gameExternalId,
-                playerCode: playerModel!.PlayerCode,
-                walletId: playerModel!.DefaultWalletId,
-                currencyCode: playerModel!.DefaultWalletCurrencyCode,
-                brandId: playerModel!.BrandId,
+                playerCode: player!.PlayerCode,
+                walletId: player!.DefaultWalletId,
+                currencyCode: player!.DefaultWalletCurrencyCode,
+                brandId: player!.BrandId,
                 gameProviderConfigurationId: gameProviderConfigurationId!.Value,
                 status: status,
                 clientStatus: clientStatus,
@@ -108,7 +108,7 @@ internal class ManualHandleRecordCommandService : ICommandService<ManualHandleRe
                 externalRoundId: command.GameRecord.ExternalRoundId,
                 gameId: gameId,
                 externalGameId: gameExternalId,
-                playerCode: playerModel?.PlayerCode ?? string.Empty,
+                playerCode: player?.PlayerCode ?? string.Empty,
                 data: JsonSerializer.Serialize(command.GameRecord),
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);

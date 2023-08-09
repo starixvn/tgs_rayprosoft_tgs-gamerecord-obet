@@ -2,4 +2,5 @@
 
 namespace Tgs.GameRecord.OBet.Core.ApplicationServices;
 
-public record ManualHandleRecordCommand(GameRecordInfo GameRecord);
+public record HandleRecordCommand(
+    GameRecordInfo GameRecord);

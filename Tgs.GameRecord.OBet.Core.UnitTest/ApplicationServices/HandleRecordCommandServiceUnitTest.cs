@@ -3,20 +3,20 @@ using NSubstitute;
 using Tgs.GameCommand.Common;
 using Tgs.GameInterface.OBet.Protos;
 using Tgs.GameRecord.OBet.Core.ApplicationServices;
-using Tgs.GameRounds.Work.Manual.Client;
-using Tgs.GameRounds.Work.Manual.Common.Protos;
+using Tgs.GameRounds.Work.Client;
+using Tgs.GameRounds.Work.Common.Protos;
 
 namespace Tgs.GameRecord.OBet.Core.UnitTest.ApplicationServices;
 
-public class ManualHandleRecordCommandServiceUnitTest
+public class HandleRecordCommandServiceUnitTest
 {
     [Fact]
     public async Task Settlement_Bets()
     {
         var fakeUtensil = Substitute.For<IUtensil>();
-        var fakeClient = Substitute.For<IGameRoundsWorkManualClient>();
+        var fakeClient = Substitute.For<IGameRoundsWorkClient>();
 
-        var command = new ManualHandleRecordCommand(
+        var command = new HandleRecordCommand(
             GameRecord: new GameRecordInfo
             {
                 ExternalRoundId = "OU1459290213398",
@@ -77,7 +77,7 @@ public class ManualHandleRecordCommandServiceUnitTest
                 gameProviderId: Arg.Is(gameProviderId))
             .Returns(gameProviderConfigurationId);
 
-        var service = new ManualHandleRecordCommandService(
+        var service = new HandleRecordCommandService(
             fakeUtensil,
             fakeClient);
 
@@ -118,9 +118,9 @@ public class ManualHandleRecordCommandServiceUnitTest
     public async Task Unsettled_Bets()
     {
         var fakeUtensil = Substitute.For<IUtensil>();
-        var fakeClient = Substitute.For<IGameRoundsWorkManualClient>();
+        var fakeClient = Substitute.For<IGameRoundsWorkClient>();
 
-        var command = new ManualHandleRecordCommand(
+        var command = new HandleRecordCommand(
             GameRecord: new GameRecordInfo
             {
                 ExternalRoundId = "OU1459290213398",
@@ -181,7 +181,7 @@ public class ManualHandleRecordCommandServiceUnitTest
                 gameProviderId: Arg.Is(gameProviderId))
             .Returns(gameProviderConfigurationId);
 
-        var service = new ManualHandleRecordCommandService(
+        var service = new HandleRecordCommandService(
             fakeUtensil,
             fakeClient);
 

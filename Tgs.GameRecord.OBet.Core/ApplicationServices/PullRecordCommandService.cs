@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Tgs.GameInterface.OBet.Client;
 using Tgs.GameInterface.OBet.Protos;
-using Tgs.GameRounds.Schedule.Protos;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.OBet.Core.ApplicationServices;
@@ -10,19 +9,16 @@ internal class PullRecordCommandService : ICommandService<PullRecordCommand>
 {
     private readonly IGameInterfaceOBetClient _client;
     private readonly ILogger<PullRecordCommandService> _logger;
-    private readonly ICommandService<ManualHandleRecordCommand> _manualService;
-    private readonly ICommandService<ScheduleHandleRecordCommand> _scheduleService;
+    private readonly ICommandService<HandleRecordCommand> _service;
 
     public PullRecordCommandService(
         ILogger<PullRecordCommandService> logger,
         IGameInterfaceOBetClient client,
-        ICommandService<ScheduleHandleRecordCommand> scheduleService,
-        ICommandService<ManualHandleRecordCommand> manualService)
+        ICommandService<HandleRecordCommand> service)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _client = client ?? throw new ArgumentNullException(nameof(client));
-        _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
-        _manualService = manualService ?? throw new ArgumentNullException(nameof(manualService));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     public async ValueTask ExecuteAsync(PullRecordCommand command, CancellationToken cancellationToken = default)
@@ -51,26 +47,15 @@ internal class PullRecordCommandService : ICommandService<PullRecordCommand>
         {
             try
             {
-                if (command.Source == ScheduleFormSource.Schedule)
-                {
-                    await _scheduleService
-                        .ExecuteAsync(
-                            command: new(GameRecord: gameRecord),
-                            cancellationToken: cancellationToken)
-                        .ConfigureAwait(false);
-                }
-                else
-                {
-                    await _manualService
-                        .ExecuteAsync(
-                            command: new(GameRecord: gameRecord),
-                            cancellationToken: cancellationToken)
-                        .ConfigureAwait(false);
-                }
+                await _service
+                    .ExecuteAsync(
+                    command: new(GameRecord: gameRecord),
+                    cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "遊戲紀錄處理發生例外.({gameRecord})", gameRecord);
+                _logger.LogError(ex, "LogOn:{logOn} Message:Exception in game record.({gameRecord})", DateTime.Now.ToString("o"), gameRecord);
             }
         }
     }

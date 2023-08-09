@@ -15,8 +15,7 @@ public class PullRecordCommandServiceUnitTest
     {
         var fakeLogger = NullLogger<PullRecordCommandService>.Instance;
         var fakeClient = Substitute.For<IGameInterfaceOBetClient>();
-        var fakeScheduleService = Substitute.For<ICommandService<ScheduleHandleRecordCommand>>();
-        var fakeManualService = Substitute.For<ICommandService<ManualHandleRecordCommand>>();
+        var fakeService = Substitute.For<ICommandService<HandleRecordCommand>>();
 
         var command = new PullRecordCommand(
             ApiUrl: new("http://localhost/"),
@@ -29,8 +28,7 @@ public class PullRecordCommandServiceUnitTest
         var service = new PullRecordCommandService(
             fakeLogger,
             fakeClient,
-            fakeScheduleService,
-            fakeManualService);
+            fakeService);
 
         await service
             .ExecuteAsync(
