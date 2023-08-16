@@ -1,10 +1,10 @@
 ﻿using Google.Protobuf.WellKnownTypes;
+using Microsoft.Extensions.Options;
 using NSubstitute;
-using Tgs.GameCommand.Common;
 using Tgs.GameInterface.OBet.Protos;
+using Tgs.GameRecord.Handle.Client;
+using Tgs.GameRecord.Handle.Common.Protos;
 using Tgs.GameRecord.OBet.Core.ApplicationServices;
-using Tgs.GameRounds.Work.Client;
-using Tgs.GameRounds.Work.Common.Protos;
 
 namespace Tgs.GameRecord.OBet.Core.UnitTest.ApplicationServices;
 
@@ -13,8 +13,12 @@ public class HandleRecordCommandServiceUnitTest
     [Fact]
     public async Task Settlement_Bets()
     {
-        var fakeUtensil = Substitute.For<IUtensil>();
-        var fakeClient = Substitute.For<IGameRoundsWorkClient>();
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "OBET",
+            GameExternalId = "sports_book"
+        });
+        var fakeClient = Substitute.For<IGameRecordHandleClient>();
 
         var command = new HandleRecordCommand(
             GameRecord: new GameRecordInfo
@@ -32,53 +36,8 @@ public class HandleRecordCommandServiceUnitTest
                 AdditionalData = "{\"Id\":\"OU1459290213398\"}"
             });
 
-        var gameProviderId = Guid.NewGuid();
-        _ = fakeUtensil
-            .GetGameProviderIdAsync(
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(gameProviderId);
-
-        var gameProviderCode = "OBET";
-        _ = fakeUtensil
-            .GetGameProviderCode()
-            .Returns(gameProviderCode);
-
-        var gameExternalId = "sports_book";
-        _ = fakeUtensil
-            .GetGameExternalId()
-            .Returns(gameExternalId);
-
-        var gameId = 1;
-        _ = fakeUtensil
-            .GetGameIdAsync(
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(gameId);
-
-        var player = new PlayerInfo(
-            ResellerId: Guid.NewGuid(),
-            ResellerCode: "TGS",
-            LicenseeId: Guid.NewGuid(),
-            LicenseeCode: "TGS",
-            BrandId: Guid.NewGuid(),
-            BrandCode: "GPI",
-            PlayerCode: "4ucmqplxb029",
-            Username: "4ucmqplxb029",
-            DefaultWalletId: Guid.NewGuid(),
-            DefaultWalletCurrencyCode: "CNY");
-        _ = fakeUtensil
-            .GetPlayerAsync(
-                playerCode: Arg.Is(command.GameRecord.PlayerCode))
-            .Returns(player);
-
-        var gameProviderConfigurationId = (Guid?)Guid.NewGuid();
-        _ = fakeUtensil
-            .GetBrandGameProviderConfigurationIdAsync(
-                brandId: Arg.Is(player.BrandId),
-                gameProviderId: Arg.Is(gameProviderId))
-            .Returns(gameProviderConfigurationId);
-
         var service = new HandleRecordCommandService(
-            fakeUtensil,
+            gameRecordInfo,
             fakeClient);
 
         await service
@@ -88,37 +47,35 @@ public class HandleRecordCommandServiceUnitTest
 
         await fakeClient
             .Received(1)
-            .RoundBidding(
-                gameProviderId: Arg.Is(gameProviderId),
-                gameProviderCode: Arg.Is(gameProviderCode),
-                externalRoundId: Arg.Is(command.GameRecord.ExternalRoundId),
-                gameId: Arg.Is(gameId),
-                externalGameId: Arg.Is(gameExternalId),
-                playerCode: Arg.Is(player!.PlayerCode),
-                walletId: Arg.Is(player!.DefaultWalletId),
-                currencyCode: Arg.Is(player!.DefaultWalletCurrencyCode),
-                brandId: Arg.Is(player!.BrandId),
-                gameProviderConfigurationId: Arg.Is(gameProviderConfigurationId!.Value),
-                status: Arg.Is(RoundStatus.Closed),
-                clientStatus: Arg.Is(RoundClientStatus.Loss),
-                externalCreatedOn: Arg.Is(command.GameRecord.ExternalCreatedOn.ToDateTimeOffset()),
-                externalClosedOn: Arg.Is(command.GameRecord.ExternalClosedOn.ToDateTimeOffset()),
-                bet: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
-                validBet: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
-                settle: command.GameRecord.Settle.ToDecimal().GetValueOrDefault(0),
-                commission: command.GameRecord.Commission.ToDecimal().GetValueOrDefault(0),
-                turnover: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
-                playerWinLoss: command.GameRecord.WinLoss.ToDecimal().GetValueOrDefault(0),
-                additionalData: command.GameRecord.AdditionalData,
-                cancellationToken: Arg.Any<CancellationToken>())
+            .MessageAsync(
+            gameProviderCode: Arg.Is(gameRecordInfo.Value.GameProviderCode),
+            externalRoundId: Arg.Is(command.GameRecord.ExternalRoundId),
+            externalGameId: Arg.Is(gameRecordInfo.Value.GameExternalId),
+            playerCode: Arg.Is(command.GameRecord.PlayerCode),
+            status: Arg.Is(GameRecordStatus.Closed),
+            clientStatus: Arg.Is(GameRecordClientStatus.Loss),
+            externalCreatedOn: Arg.Is(command.GameRecord.ExternalCreatedOn.ToDateTimeOffset()),
+            externalClosedOn: Arg.Is(command.GameRecord.ExternalClosedOn.ToDateTimeOffset()),
+            bet: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
+            validBet: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
+            settle: command.GameRecord.Settle.ToDecimal().GetValueOrDefault(0),
+            commission: command.GameRecord.Commission.ToDecimal().GetValueOrDefault(0),
+            turnover: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
+            playerWinLoss: command.GameRecord.WinLoss.ToDecimal().GetValueOrDefault(0),
+            additionalData: command.GameRecord.AdditionalData,
+            cancellationToken: Arg.Any<CancellationToken>())
             .ConfigureAwait(false);
     }
 
     [Fact]
     public async Task Unsettled_Bets()
     {
-        var fakeUtensil = Substitute.For<IUtensil>();
-        var fakeClient = Substitute.For<IGameRoundsWorkClient>();
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "OBET",
+            GameExternalId = "sports_book"
+        });
+        var fakeClient = Substitute.For<IGameRecordHandleClient>();
 
         var command = new HandleRecordCommand(
             GameRecord: new GameRecordInfo
@@ -136,53 +93,8 @@ public class HandleRecordCommandServiceUnitTest
                 AdditionalData = "{\"Id\":\"OU1459720030614\"}"
             });
 
-        var gameProviderId = Guid.NewGuid();
-        _ = fakeUtensil
-            .GetGameProviderIdAsync(
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(gameProviderId);
-
-        var gameProviderCode = "OBET";
-        _ = fakeUtensil
-            .GetGameProviderCode()
-            .Returns(gameProviderCode);
-
-        var gameExternalId = "sports_book";
-        _ = fakeUtensil
-            .GetGameExternalId()
-            .Returns(gameExternalId);
-
-        var gameId = 1;
-        _ = fakeUtensil
-            .GetGameIdAsync(
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(gameId);
-
-        var player = new PlayerInfo(
-            ResellerId: Guid.NewGuid(),
-            ResellerCode: "TGS",
-            LicenseeId: Guid.NewGuid(),
-            LicenseeCode: "TGS",
-            BrandId: Guid.NewGuid(),
-            BrandCode: "GPI",
-            PlayerCode: "4ucmqplxb029",
-            Username: "4ucmqplxb029",
-            DefaultWalletId: Guid.NewGuid(),
-            DefaultWalletCurrencyCode: "CNY");
-        _ = fakeUtensil
-            .GetPlayerAsync(
-                playerCode: Arg.Is(command.GameRecord.PlayerCode))
-            .Returns(player);
-
-        var gameProviderConfigurationId = (Guid?)Guid.NewGuid();
-        _ = fakeUtensil
-            .GetBrandGameProviderConfigurationIdAsync(
-                brandId: Arg.Is(player.BrandId),
-                gameProviderId: Arg.Is(gameProviderId))
-            .Returns(gameProviderConfigurationId);
-
         var service = new HandleRecordCommandService(
-            fakeUtensil,
+            gameRecordInfo,
             fakeClient);
 
         await service
@@ -192,29 +104,23 @@ public class HandleRecordCommandServiceUnitTest
 
         await fakeClient
             .Received(1)
-            .RoundBidding(
-                gameProviderId: Arg.Is(gameProviderId),
-                gameProviderCode: Arg.Is(gameProviderCode),
-                externalRoundId: Arg.Is(command.GameRecord.ExternalRoundId),
-                gameId: Arg.Is(gameId),
-                externalGameId: Arg.Is(gameExternalId),
-                playerCode: Arg.Is(player!.PlayerCode),
-                walletId: Arg.Is(player!.DefaultWalletId),
-                currencyCode: Arg.Is(player!.DefaultWalletCurrencyCode),
-                brandId: Arg.Is(player!.BrandId),
-                gameProviderConfigurationId: Arg.Is(gameProviderConfigurationId!.Value),
-                status: Arg.Is(RoundStatus.Open),
-                clientStatus: Arg.Is(RoundClientStatus.Open),
-                externalCreatedOn: Arg.Is(command.GameRecord.ExternalCreatedOn.ToDateTimeOffset()),
-                externalClosedOn: null,
-                bet: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
-                validBet: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
-                settle: command.GameRecord.Settle.ToDecimal().GetValueOrDefault(0),
-                commission: command.GameRecord.Commission.ToDecimal().GetValueOrDefault(0),
-                turnover: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
-                playerWinLoss: command.GameRecord.WinLoss.ToDecimal().GetValueOrDefault(0),
-                additionalData: command.GameRecord.AdditionalData,
-                cancellationToken: Arg.Any<CancellationToken>())
+            .MessageAsync(
+            gameProviderCode: Arg.Is(gameRecordInfo.Value.GameProviderCode),
+            externalRoundId: Arg.Is(command.GameRecord.ExternalRoundId),
+            externalGameId: Arg.Is(gameRecordInfo.Value.GameExternalId),
+            playerCode: Arg.Is(command.GameRecord.PlayerCode),
+            status: Arg.Is(GameRecordStatus.Open),
+            clientStatus: Arg.Is(GameRecordClientStatus.Open),
+            externalCreatedOn: Arg.Is(command.GameRecord.ExternalCreatedOn.ToDateTimeOffset()),
+            externalClosedOn: null,
+            bet: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
+            validBet: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
+            settle: command.GameRecord.Settle.ToDecimal().GetValueOrDefault(0),
+            commission: command.GameRecord.Commission.ToDecimal().GetValueOrDefault(0),
+            turnover: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
+            playerWinLoss: command.GameRecord.WinLoss.ToDecimal().GetValueOrDefault(0),
+            additionalData: command.GameRecord.AdditionalData,
+            cancellationToken: Arg.Any<CancellationToken>())
             .ConfigureAwait(false);
     }
 }
