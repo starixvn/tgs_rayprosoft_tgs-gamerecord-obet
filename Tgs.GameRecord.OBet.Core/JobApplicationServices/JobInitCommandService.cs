@@ -2,6 +2,7 @@
 using System.Text.Json.Nodes;
 using Hangfire;
 using Hangfire.Storage;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tgs.GameCommand.Client;
@@ -81,12 +82,10 @@ internal class JobInitCommandService : ICommandService<JobInitCommand>
                 var apiUrl = new Uri(configurationDataJson["ApiUrl"]?.ToString()
                     ?? settingConfigurationJson["ApiUrl"]?.ToString()
                     ?? throw new Exception($"Required parameters(ApiUrl)"));
-                var appId = configurationDataJson["AppId"]?.ToString()
-                    ?? settingConfigurationJson["AppId"]?.ToString()
-                    ?? throw new Exception($"Required parameters(AppId)");
-                var secretKey = configurationDataJson["SecretKey"]?.ToString()
-                    ?? settingConfigurationJson["SecretKey"]?.ToString()
-                    ?? throw new Exception($"Required parameters(SecretKey)");
+                var apiKey = configurationDataJson["ApiKey"]?.ToString()
+                    ?? throw new Exception($"Required parameters(ApiKey)");
+                var agentId = configurationDataJson["AgentId"]?.ToString()
+                    ?? throw new Exception($"Required parameters(AgentId)");
 
                 if (gameProviderAgentMapper.ContainsKey(gameProviderConfig.Name))
                 {
@@ -97,10 +96,10 @@ internal class JobInitCommandService : ICommandService<JobInitCommand>
                     GameProviderCode: _gameRecordInfo.GameProviderCode,
                     Name: gameProviderConfig.Name,
                     ApiUrl: apiUrl,
-                    AppId: appId,
-                    SecretKey: secretKey);
+                    ApiKey: apiKey,
+                    AgentId: agentId);
 
-                gameProviderAgentMapper.Add(gameProviderConfig.Name, jobExecuteCommand);
+                gameProviderAgentMapper.Add(agentId, jobExecuteCommand);
 
                 RecurringJob.AddOrUpdate<IHangfireUtensil>(
                     recurringJobId: gameProviderConfig.Name,

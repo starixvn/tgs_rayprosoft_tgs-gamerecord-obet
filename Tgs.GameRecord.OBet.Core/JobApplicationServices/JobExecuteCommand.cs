@@ -4,5 +4,5 @@ public record JobExecuteCommand(
     string GameProviderCode,
     string Name,
     Uri ApiUrl,
-    string AppId,
-    string SecretKey);
+    string ApiKey,
+    string AgentId);

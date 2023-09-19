@@ -37,8 +37,8 @@ internal class JobExecuteCommandService : ICommandService<JobExecuteCommand>
         {
             command.ApiUrl,
             command.GameProviderCode,
-            command.AppId,
-            command.SecretKey,
+            command.ApiKey,
+            command.AgentId,
             StartTime = startTime,
             EndTime = endTime
         };
@@ -46,14 +46,14 @@ internal class JobExecuteCommandService : ICommandService<JobExecuteCommand>
         _logger.LogDebug("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), parameters);
 
         return _client
-            .Joker_ScheduleFormQueuedAsync(
+            .OBet_ScheduleFormQueuedAsync(
             gameProviderCode: command.GameProviderCode,
             name: command.Name,
-            subject: "gp.gamerecord.scheduleform.joker.queued",
+            subject: "gp.gamerecord.scheduleform.obet.queued",
             source: ScheduleFormSource.Schedule,
             apiUrl: parameters.ApiUrl,
-            appId: parameters.AppId,
-            secretKey: parameters.SecretKey,
+            apiKey: parameters.ApiKey,
+            agentId: parameters.AgentId,
             startTime: parameters.StartTime,
             endTime: parameters.EndTime,
             cancellationToken: cancellationToken);
