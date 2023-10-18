@@ -33,10 +33,10 @@ internal class HandleRecordCommandService : ICommandService<HandleRecordCommand>
         if (command.GameRecord.IsClosed || command.GameRecord.IsVoid)
         {
             externalClosedOn = command.GameRecord.ExternalClosedOn.ToDateTimeOffset();
-            wagerState = command.GameRecord.IsVoid ? WagerStates.Void : winLoss <= 0 ? WagerStates.Lose : WagerStates.Win;
+            winLoss = command.GameRecord.WinLoss.ToDecimal().GetValueOrDefault(0);
             settle = command.GameRecord.Settle.ToDecimal().GetValueOrDefault(0);
             turnover = command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0);
-            winLoss = command.GameRecord.WinLoss.ToDecimal().GetValueOrDefault(0);
+            wagerState = command.GameRecord.IsVoid ? WagerStates.Void : winLoss <= 0 ? WagerStates.Lose : WagerStates.Win;
         }
 
         await _client
