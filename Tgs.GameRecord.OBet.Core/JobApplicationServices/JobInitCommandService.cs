@@ -2,7 +2,6 @@
 using System.Text.Json.Nodes;
 using Hangfire;
 using Hangfire.Storage;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tgs.GameCommand.Client;
@@ -87,7 +86,7 @@ internal class JobInitCommandService : ICommandService<JobInitCommand>
                 var agentId = configurationDataJson["AgentId"]?.ToString()
                     ?? throw new Exception($"Required parameters(AgentId)");
 
-                if (gameProviderAgentMapper.ContainsKey(gameProviderConfig.Name))
+                if (gameProviderAgentMapper.ContainsKey(agentId))
                 {
                     continue;
                 }
@@ -101,8 +100,10 @@ internal class JobInitCommandService : ICommandService<JobInitCommand>
 
                 gameProviderAgentMapper.Add(agentId, jobExecuteCommand);
 
+                var recurringJobId = $"{gameProviderConfig.Name}|{agentId}|{gameProviderConfig.GameProviderConfigId}";
+
                 RecurringJob.AddOrUpdate<IHangfireUtensil>(
-                    recurringJobId: gameProviderConfig.Name,
+                    recurringJobId: recurringJobId,
                     methodCall: service => service.JobExecuteAsync(jobExecuteCommand),
                     cronExpression: Cron.Minutely(),
                     options: _recurringJobOptions);
