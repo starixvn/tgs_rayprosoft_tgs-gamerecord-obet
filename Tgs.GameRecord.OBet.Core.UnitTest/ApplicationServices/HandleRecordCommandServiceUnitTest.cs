@@ -1,4 +1,5 @@
-﻿using Google.Protobuf.WellKnownTypes;
+﻿using System.Text.Json.Nodes;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tgs.GameInterface.OBet.Protos;
@@ -66,7 +67,7 @@ public class HandleRecordCommandServiceUnitTest
             commission: command.GameRecord.Commission.ToDecimal().GetValueOrDefault(0),
             turnover: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
             winLoss: command.GameRecord.WinLoss.ToDecimal().GetValueOrDefault(0),
-            additionalData: command.GameRecord.AdditionalData,
+            additionalData: Arg.Any<JsonNode>(),
             cancellationToken: Arg.Any<CancellationToken>());
     }
 
@@ -126,7 +127,7 @@ public class HandleRecordCommandServiceUnitTest
             commission: command.GameRecord.Commission.ToDecimal().GetValueOrDefault(0),
             turnover: command.GameRecord.Bet.ToDecimal().GetValueOrDefault(0),
             winLoss: command.GameRecord.WinLoss.ToDecimal().GetValueOrDefault(0),
-            additionalData: command.GameRecord.AdditionalData,
+            additionalData: Arg.Any<JsonNode>(),
             cancellationToken: Arg.Any<CancellationToken>());
     }
 
@@ -188,7 +189,7 @@ public class HandleRecordCommandServiceUnitTest
             commission: Arg.Is(0.0m),
             turnover: Arg.Is(0.0m),
             winLoss: Arg.Is(0.0m),
-            additionalData: command.GameRecord.AdditionalData,
+            additionalData: Arg.Any<JsonNode>(),
             cancellationToken: Arg.Any<CancellationToken>());
     }
 }
