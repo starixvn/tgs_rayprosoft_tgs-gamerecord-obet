@@ -11,7 +11,8 @@ data:
       "Logging": {
         "LogLevel": {
           "Default": "Warning",
-          "Tgs.GameRecord.OBet.Messages": "Information"
+          "Tgs.GameRecord.OBet.Messages": "Information",
+          "Tgs.GameRecord.OBet.Core.ApplicationServices.HandleRecordCommandService": "Information"
         }
       },
       "GameRecord": {
