@@ -11,8 +11,10 @@ data:
       "Logging": {
         "LogLevel": {
           "Default": "Warning",
-          "Tgs.GameRecord.OBet.Messages": "Information",
-          "Tgs.GameRecord.OBet.Core.ApplicationServices.HandleRecordCommandService": "Information"
+          "Grpc.Net.Client.Balancer": "Debug",
+          "Tgs.GameRecord.OBet.Messages.ManualMessageHandler": "Warning",
+          "Tgs.GameRecord.OBet.Messages.ScheduleMessageHandler": "Warning",
+          "Tgs.GameRecord.OBet.Core.ApplicationServices.HandleRecordCommandService": "Warning"
         }
       },
       "GameRecord": {
