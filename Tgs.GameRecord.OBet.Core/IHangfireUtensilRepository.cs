@@ -2,7 +2,7 @@
 
 namespace Tgs.GameRecord.OBet.Core;
 
-public interface IHangfireUtensil
+public interface IHangfireUtensilRepository
 {
 	public Task JobCheckAsync();
 

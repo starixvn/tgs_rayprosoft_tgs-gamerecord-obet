@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameRecord.OBet.Core", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameRecord.OBet.Core.UnitTest", "Tgs.GameRecord.OBet.Core.UnitTest\Tgs.GameRecord.OBet.Core.UnitTest.csproj", "{5BCADC33-4B9C-402B-8506-3AB069A60648}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.GameRecord.OBet.Common", "Tgs.GameRecord.OBet.Common\Tgs.GameRecord.OBet.Common.csproj", "{DB6E984A-85B6-4235-841D-AD982DA9B8A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameRecord.OBet.Common", "Tgs.GameRecord.OBet.Common\Tgs.GameRecord.OBet.Common.csproj", "{DB6E984A-85B6-4235-841D-AD982DA9B8A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.GameRecord.OBet.Repositories", "Tgs.GameRecord.OBet.Repositories\Tgs.GameRecord.OBet.Repositories.csproj", "{2AACAE06-91D8-4550-91F7-14D565AB7F74}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{DB6E984A-85B6-4235-841D-AD982DA9B8A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB6E984A-85B6-4235-841D-AD982DA9B8A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB6E984A-85B6-4235-841D-AD982DA9B8A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AACAE06-91D8-4550-91F7-14D565AB7F74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AACAE06-91D8-4550-91F7-14D565AB7F74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AACAE06-91D8-4550-91F7-14D565AB7F74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AACAE06-91D8-4550-91F7-14D565AB7F74}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
