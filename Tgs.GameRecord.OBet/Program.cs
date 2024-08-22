@@ -165,10 +165,10 @@ app.UseHangfireDashboard(
 	"/hangfire",
 	new DashboardOptions()
 	{
-		Authorization = new[]
-		{
+		Authorization =
+		[
 			new IgnoreHangfireAuthorizationFilter()
-		}
+		]
 	});
 
 _ = app.UseAuthorization();
