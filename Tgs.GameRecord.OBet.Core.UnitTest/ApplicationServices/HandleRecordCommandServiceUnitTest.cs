@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tgs.GameInterface.OBet.Protos;
+using Tgs.GameRecord.Handle.Client;
 using Tgs.GameRecord.OBet.Core.ApplicationServices;
 using Valhalla.MessageQueue;
 
@@ -14,7 +15,7 @@ public class HandleRecordCommandServiceUnitTest
 	public async Task Settlement_Bets_Lose()
 	{
 		var faceLogger = NullLogger<HandleRecordCommandService>.Instance;
-		var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+		var fakeGameRecordInfoOptions = Options.Create(new GameRecordInfoOptions
 		{
 			GameProviderCode = "OBET",
 			GameExternalId = "sports_book",
@@ -24,7 +25,12 @@ public class HandleRecordCommandServiceUnitTest
 			IntervalMinutesMax = 15,
 			IntervalMinutesMinimum = 1
 		});
-		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakePolicySettingsOptions = Options.Create(new PolicySettingsOptions
+		{
+			RetryCount = 1,
+			RetrySeconds = 1,
+		});
+		var fakeGameRecordHandleClient = Substitute.For<IGameRecordHandleClient>();
 
 		var command = new HandleRecordCommand(
 			GameRecord: new GameRecordInfo
@@ -42,28 +48,28 @@ public class HandleRecordCommandServiceUnitTest
 				AdditionalData = "{\"Id\":\"OU1459290213398\"}"
 			});
 
-		var service = new HandleRecordCommandService(
+		var sut = new HandleRecordCommandService(
 			faceLogger,
-			gameRecordInfo,
-			fakeMessageSender);
+			fakeGameRecordInfoOptions,
+			fakePolicySettingsOptions,
+			fakeGameRecordHandleClient);
 
-		await service.ExecuteAsync(command: command);
+		await sut.ExecuteAsync(command: command);
 
-		_ = fakeMessageSender
+		_ = fakeGameRecordHandleClient
 			.Received(1)
-			.PublishAsync(
-			subject: Arg.Is(Handle.Common.GameRecordHandleNatsConst.GameRecordHandleRequest),
-			data: Arg.Is(new Handle.Common.Protos.GameRecordHandleRequest
+			.HandleAsync(
+			source: Arg.Is(new Handle.Common.ViewModels.GameRecordHandleViewModel
 			{
-				GameProviderCode = gameRecordInfo.Value.GameProviderCode,
+				GameProviderCode = fakeGameRecordInfoOptions.Value.GameProviderCode,
 				PlayerCode = command.GameRecord.PlayerCode,
 				ExternalRoundId = command.GameRecord.ExternalRoundId,
 				ExternalBetId = command.GameRecord.ExternalRoundId,
-				ExternalGameId = gameRecordInfo.Value.GameExternalId,
-				ExternalCreatedOn = command.GameRecord.ExternalCreatedOn,
-				ExternalClosedOn = command.GameRecord.ExternalClosedOn,
-				ExternalPayoffOn = command.GameRecord.ExternalClosedOn,
-				ExternalResettleOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
+				ExternalGameId = fakeGameRecordInfoOptions.Value.GameExternalId,
+				ExternalCreatedOn = command.GameRecord.ExternalCreatedOn.ToDateTimeOffset(),
+				ExternalClosedOn = command.GameRecord.ExternalClosedOn.ToDateTimeOffset(),
+				ExternalPayoffOn = command.GameRecord.ExternalClosedOn.ToDateTimeOffset(),
+				ExternalResettleOn = DateTimeOffset.UnixEpoch,
 				BetState = Handle.Common.Protos.BetState.Loss,
 				BetType = Handle.Common.Protos.BetType.Normal,
 				FreeGameState = Handle.Common.Protos.FreeGameState.None,
@@ -87,7 +93,7 @@ public class HandleRecordCommandServiceUnitTest
 	public async Task Settlement_Bets_Win()
 	{
 		var faceLogger = NullLogger<HandleRecordCommandService>.Instance;
-		var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+		var fakeGameRecordInfoOptions = Options.Create(new GameRecordInfoOptions
 		{
 			GameProviderCode = "OBET",
 			GameExternalId = "sports_book",
@@ -97,7 +103,12 @@ public class HandleRecordCommandServiceUnitTest
 			IntervalMinutesMax = 15,
 			IntervalMinutesMinimum = 1
 		});
-		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakePolicySettingsOptions = Options.Create(new PolicySettingsOptions
+		{
+			RetryCount = 1,
+			RetrySeconds = 1,
+		});
+		var fakeGameRecordHandleClient = Substitute.For<IGameRecordHandleClient>();
 
 		var command = new HandleRecordCommand(
 			GameRecord: new GameRecordInfo
@@ -115,28 +126,28 @@ public class HandleRecordCommandServiceUnitTest
 				AdditionalData = "{\"Id\":\"HDP1662557219039\",\"SDate\":\"2023-10-17T00:00:00\",\"TDate\":\"2023-10-18T09:02:34.05\",\"KDate\":\"2023-10-18T08:30:00\",\"ADate\":\"2023-10-18T09:03:16.737\",\"PDate\":\"2023-10-18T10:30:38.05\",\"User\":\"WHKTGHK4UIYXMY8RA4A\",\"Sport\":\"Football\",\"League\":\"International Friendly\",\"Home\":\"USA\",\"Away\":\"Ghana\",\"Sport_en\":\"Football\",\"League_en\":\"International Friendly\",\"Home_en\":\"USA\",\"Away_en\":\"Ghana\",\"Live\":\"True\",\"HomeScore\":\"3\",\"AwayScore\":\"0\",\"Status\":\"0\",\"FT\":\"f\",\"OddsType\":\"HK\",\"Game\":\"HDP\",\"Info\":\"-0.5\",\"Odds\":\"0.84\",\"Side\":\"h\",\"Side_en\":null,\"Bamt\":\"500.0000\",\"Wamt\":\"420.0000\",\"Tresult\":\"1\",\"Fhscore\":\"4-0\",\"Ftscore\":\"4-0\",\"FG\":\"h\",\"LG\":\"h\",\"IP\":\"203.145.89.5-HK\",\"IsMobile\":1,\"Commission\":\"0.0000\"}"
 			});
 
-		var service = new HandleRecordCommandService(
+		var sut = new HandleRecordCommandService(
 			faceLogger,
-			gameRecordInfo,
-			fakeMessageSender);
+			fakeGameRecordInfoOptions,
+			fakePolicySettingsOptions,
+			fakeGameRecordHandleClient);
 
-		await service.ExecuteAsync(command: command);
+		await sut.ExecuteAsync(command: command);
 
-		_ = fakeMessageSender
+		_ = fakeGameRecordHandleClient
 			.Received(1)
-			.PublishAsync(
-			subject: Arg.Is(Handle.Common.GameRecordHandleNatsConst.GameRecordHandleRequest),
-			data: Arg.Is(new Handle.Common.Protos.GameRecordHandleRequest
+			.HandleAsync(
+			source: Arg.Is(new Handle.Common.ViewModels.GameRecordHandleViewModel
 			{
-				GameProviderCode = gameRecordInfo.Value.GameProviderCode,
+				GameProviderCode = fakeGameRecordInfoOptions.Value.GameProviderCode,
 				PlayerCode = command.GameRecord.PlayerCode,
 				ExternalRoundId = command.GameRecord.ExternalRoundId,
 				ExternalBetId = command.GameRecord.ExternalRoundId,
-				ExternalGameId = gameRecordInfo.Value.GameExternalId,
-				ExternalCreatedOn = command.GameRecord.ExternalCreatedOn,
-				ExternalClosedOn = command.GameRecord.ExternalClosedOn,
-				ExternalPayoffOn = command.GameRecord.ExternalClosedOn,
-				ExternalResettleOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
+				ExternalGameId = fakeGameRecordInfoOptions.Value.GameExternalId,
+				ExternalCreatedOn = command.GameRecord.ExternalCreatedOn.ToDateTimeOffset(),
+				ExternalClosedOn = command.GameRecord.ExternalClosedOn.ToDateTimeOffset(),
+				ExternalPayoffOn = command.GameRecord.ExternalClosedOn.ToDateTimeOffset(),
+				ExternalResettleOn = DateTimeOffset.UnixEpoch,
 				BetState = Handle.Common.Protos.BetState.Win,
 				BetType = Handle.Common.Protos.BetType.Normal,
 				FreeGameState = Handle.Common.Protos.FreeGameState.None,
@@ -160,7 +171,7 @@ public class HandleRecordCommandServiceUnitTest
 	public async Task Unsettled_Bets()
 	{
 		var faceLogger = NullLogger<HandleRecordCommandService>.Instance;
-		var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+		var fakeGameRecordInfoOptions = Options.Create(new GameRecordInfoOptions
 		{
 			GameProviderCode = "OBET",
 			GameExternalId = "sports_book",
@@ -170,7 +181,12 @@ public class HandleRecordCommandServiceUnitTest
 			IntervalMinutesMax = 15,
 			IntervalMinutesMinimum = 1
 		});
-		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakePolicySettingsOptions = Options.Create(new PolicySettingsOptions
+		{
+			RetryCount = 1,
+			RetrySeconds = 1,
+		});
+		var fakeGameRecordHandleClient = Substitute.For<IGameRecordHandleClient>();
 
 		var command = new HandleRecordCommand(
 			GameRecord: new GameRecordInfo
@@ -188,28 +204,28 @@ public class HandleRecordCommandServiceUnitTest
 				AdditionalData = "{\"Id\":\"OU1459720030614\"}"
 			});
 
-		var service = new HandleRecordCommandService(
+		var sut = new HandleRecordCommandService(
 			faceLogger,
-			gameRecordInfo,
-			fakeMessageSender);
+			fakeGameRecordInfoOptions,
+			fakePolicySettingsOptions,
+			fakeGameRecordHandleClient);
 
-		await service.ExecuteAsync(command: command);
+		await sut.ExecuteAsync(command: command);
 
-		_ = fakeMessageSender
+		_ = fakeGameRecordHandleClient
 			.Received(1)
-			.PublishAsync(
-			subject: Arg.Is(Handle.Common.GameRecordHandleNatsConst.GameRecordHandleRequest),
-			data: Arg.Is(new Handle.Common.Protos.GameRecordHandleRequest
+			.HandleAsync(
+			source: Arg.Is(new Handle.Common.ViewModels.GameRecordHandleViewModel
 			{
-				GameProviderCode = gameRecordInfo.Value.GameProviderCode,
+				GameProviderCode = fakeGameRecordInfoOptions.Value.GameProviderCode,
 				PlayerCode = command.GameRecord.PlayerCode,
 				ExternalRoundId = command.GameRecord.ExternalRoundId,
 				ExternalBetId = command.GameRecord.ExternalRoundId,
-				ExternalGameId = gameRecordInfo.Value.GameExternalId,
-				ExternalCreatedOn = command.GameRecord.ExternalCreatedOn,
-				ExternalClosedOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
-				ExternalPayoffOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
-				ExternalResettleOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
+				ExternalGameId = fakeGameRecordInfoOptions.Value.GameExternalId,
+				ExternalCreatedOn = command.GameRecord.ExternalCreatedOn.ToDateTimeOffset(),
+				ExternalClosedOn = DateTimeOffset.UnixEpoch,
+				ExternalPayoffOn = DateTimeOffset.UnixEpoch,
+				ExternalResettleOn = DateTimeOffset.UnixEpoch,
 				BetState = Handle.Common.Protos.BetState.Running,
 				BetType = Handle.Common.Protos.BetType.Normal,
 				FreeGameState = Handle.Common.Protos.FreeGameState.None,

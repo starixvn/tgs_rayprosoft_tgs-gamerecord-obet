@@ -24,7 +24,7 @@ internal class JobExecuteCommandService(
 		var endTime = DateTimeOffset.ParseExact(DateTimeOffset.UtcNow.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
 		var startTime = endTime.AddMinutes(_intervalMinutes * -1);
 
-		var parameters = new OBetGameRecordMessage
+		var message = new OBetGameRecordMessage
 		{
 			ApiUrl = command.ApiUrl,
 			ApiKey = command.ApiKey,
@@ -33,11 +33,25 @@ internal class JobExecuteCommandService(
 			EndTime = endTime
 		};
 
-		logger.LogInformation("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), parameters);
+		logger.LogInformation("{logInformation}",
+			JsonSerializer.Serialize(new
+			{
+				LogOn = DateTime.Now.ToString("u"),
+				Subject = OBetNatsConst.SchedulePublish,
+				Data = new
+				{
+					message.ApiUrl,
+					message.ApiKey,
+					message.AgentId,
+					StartTime = message.StartTime.ToString("u"),
+					EndTime = message.EndTime.ToString("u")
+				},
+				Message = "This message publishing handler."
+			}));
 
 		return messageSender.PublishAsync(
 			subject: OBetNatsConst.SchedulePublish,
-			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(parameters)),
+			data: JsonSerializer.SerializeToUtf8Bytes(message),
 			cancellationToken: cancellationToken);
 	}
 }
